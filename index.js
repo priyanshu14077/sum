@@ -50,6 +50,25 @@ app.get("/calculate", (req, res) => {
   res.json({ result: operation() });
 });
 
+app.post("/stats", (req, res) => {
+  const numbers = req.body?.numbers;
+  if (
+    !Array.isArray(numbers) ||
+    numbers.length === 0 ||
+    !numbers.every((n) => typeof n === "number" && Number.isFinite(n))
+  ) {
+    return res.status(400).json({ error: "Body must be { numbers: [...] } with at least one number" });
+  }
+  const sum = numbers.reduce((total, n) => total + n, 0);
+  res.json({
+    count: numbers.length,
+    sum,
+    mean: sum / numbers.length,
+    min: Math.min(...numbers),
+    max: Math.max(...numbers),
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
