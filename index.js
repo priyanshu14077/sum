@@ -26,6 +26,30 @@ app.get("/sum", (req, res) => {
   res.json({ result: operands.a + operands.b });
 });
 
+app.get("/calculate", (req, res) => {
+  const operands = parseOperands(req.query);
+  if (!operands) {
+    return res.status(400).json({ error: "Query params a and b must be numbers" });
+  }
+  const { a, b } = operands;
+  const operations = {
+    add: () => a + b,
+    subtract: () => a - b,
+    multiply: () => a * b,
+    divide: () => a / b,
+  };
+  const operation = operations[req.query.op];
+  if (!operation) {
+    return res.status(400).json({
+      error: `Query param op must be one of: ${Object.keys(operations).join(", ")}`,
+    });
+  }
+  if (req.query.op === "divide" && b === 0) {
+    return res.status(400).json({ error: "Cannot divide by zero" });
+  }
+  res.json({ result: operation() });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
